@@ -38,7 +38,7 @@
 					d3.max(data, function(d) { return d.HRCper; })
 				]);
 				//Load in GeoJSON data
-				d3.json("congressionals.json", function(json) {
+				d3.json("https://raw.githubusercontent.com/aagoldberg/aagoldberg.github.io/master/congressionals.json", function(json) {
 					//Merge the ag. data and GeoJSON
 					//Loop through once for each ag. data value
 					for (var i = 0; i < data.length; i++) {
