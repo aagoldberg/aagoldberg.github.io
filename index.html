@@ -31,7 +31,7 @@
 						.attr("width", w)
 						.attr("height", h);
 			//Load in agriculture data
-			d3.csv("https://raw.githubusercontent.com/aagoldberg/aagoldberg.github.io/master/PresResDat.csv", function(data) {
+			d3.csv("https://raw.githubusercontent.com/aagoldberg/aagoldberg.github.io/master/PresResDat2.csv", function(data) {
 				//Set input domain for color scale
 				color.domain([
 					d3.min(data, function(d) { return d.HRCper; }), 
