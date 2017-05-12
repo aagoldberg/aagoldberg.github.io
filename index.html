@@ -56,7 +56,7 @@
 							var jsonState = json.features[j].properties.STATEFP;
 							var jsonCD = json.features[j].properties.CD115FP;
 							
-							if (dataState == jsonState) {
+							if (dataState == jsonState && dataCD == jsonCD) {
 						
 								//Copy the data value into the JSON
 								json.features[j].properties.HRCper = dataValue;
