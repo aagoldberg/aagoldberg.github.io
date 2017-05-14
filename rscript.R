@@ -32,9 +32,6 @@ library(VIM)
 aggr(anes_data_map, bars=F, sortVars=T)
 MICE <- mice(anes_data_map, predictorMatrix = quickpred(anes_data_map), method = "mean", printFlag = F)
 anes_data_map <- mice::complete(MICE, action = 1)
-str(iris)
-
-asdf <- iris %>% count(Species, wt = Sepal.Length)
 
 anes_map_pres <- anes_data_map %>%
   group_by(state, cd) %>%
@@ -49,8 +46,8 @@ anes_map_pres <- anes_data_map %>%
 anes_map_rest <- anes_data_map %>%
   group_by(state, cd) %>%
   replace(is.na(.), 0) %>%
-  summarise_each(funs(mean)) %>%
-  
+  summarise_each(funs(mean)) 
+
 
 anes_map_comb <- merge(x = anes_map_pres, y = anes_map_rest, by = "state_cd", all.x = TRUE)
 
@@ -79,20 +76,42 @@ anes_map["cd"][anes_map$state == "38",] <- 0
 anes_map["cd"][anes_map$state == "46",] <- 0
 anes_map["cd"][anes_map$state == "50",] <- 0
 anes_map["cd"][anes_map$state == "56",] <- 0
+anes_map["cd"][anes_map$state == "11",] <- 98
 
 anes_map <- anes_map %>%
   mutate(cd = as.factor(formatC(cd, width = 2, format = "d", flag = "0"))) %>%
   mutate(state = as.factor(formatC(state, width=2, format = "d", flag = "0"))) %>%
+  mutate(state_cd = paste(state, cd, sep='_'))   %>%
   mutate_each(funs(round(.,1)), therm_feminists, therm_unions, therm_lgbt, therm_muslims, flag_pride, reducing_debt, millionaires_tax, immigration_hurts_jobs, government_size, obama_muslim, total_pres)
   
-#now join data to 
+#now join data to dbf
+anes_dbf <- read.dbf("/Users/andrew/Documents/School/AnesFinal/cb_2016_us_cd115_5m/cb_2016_us_cd115_5m.dbf")
+#anes_dbf <- read.dbf("https://github.com/aagoldberg/aagoldberg.github.io/blob/master/cb_2016_us_cd115_5m.dbf")
+str(anes_dbf)
+str(anes_map)
+
+
+anes_dbf$state_cd <- as.factor(paste(anes_dbf$STATEFP, anes_dbf$CD115FP, sep='_'))
+anes_dbf_merged <- merge(anes_dbf, anes_map, by="state_cd", all = TRUE)
+str(anes_dbf_merged)
+anes_dbf_merged[anes_dbf_merged == NA] == NA
+
+anes_dbf_merged[,-13:-1] <- lapply(anes_dbf_merged[,-13:-1], factor)
+setwd("/Users/andrew/Documents/School/AnesFinal/cb_2016_us_cd115_5m")
+write.dbf(anes_dbf_merged, "cb_2016_us_cd115_5m")
+
+str(anes_dbf)
+
+getOption("max.print") <- 2000
+
 #checking joins
 str(anes_csv_dplyr)
 anes_csv$cd_sp <- as.factor(formatC(anes_csv$CD, width = 2, format = "d", flag = "0"))
 summary(anes_csv)
 anes_comb <- left_join(anes_dbf_dplyr, anes_csv_dplyr, by = "state_cd")
 summary(anes_comb)
-anes_comb
+
+
 
 
 anes_csv2 <- anes_csv_dplyr[,c(9,8,6,7)]
@@ -102,7 +121,10 @@ setwd("/Users/andrew/Documents/School/AnesFinal/cb_2016_us_cd115_5m")
 write.csv(anes_csv2, file = "PresResDat2.csv")
 setwd("/Users/andrew/Documents/School/AnesFinal/aagoldberg.github.io")
 write.csv(anes_csv2, file = "PresResDat3.csv")
-/Users/andrew/Documents/School/AnesFinal/aagoldberg.github.io/index.html
+#/Users/andrew/Documents/School/AnesFinal/aagoldberg.github.io/index.html
+
+
+
 getwd()
 nrow(anes_csv)
 nrow(anes_csv2)
