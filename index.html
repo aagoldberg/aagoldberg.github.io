@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="utf-8">
 		<title>Election Results by Congressional District</title>
-		<script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
+		<script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script> 
 		<script type="text/javascript" src="hhttps://cdnjs.cloudflare.com/ajax/libs/queue-async/1.0.7/queue.min.js"></script>
 		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
 		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.19/topojson.min.js"></script>
@@ -14,7 +14,9 @@
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/queue-async/1.0.7/queue.min.js"></script>
 		<script src="https://rawgit.com/maptimelex/d3-mapping/master/d3-map06-data-area/simple_statistics.js"></script>
 		<link href="http://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet" type="text/css">
-		<center><b>American National Election Studies 2016 Time Series Studyresults by Congressional District</b></center>
+		<center><b>American National Election Studies 2016 Time Series Study results by Congressional District</b></center>
+    <center><p>Resources available at<a href="http://www.electionstudies.org/studypages/anes_timeseries_2016/anes_timeseries_2016.htm">electionstudies.org</a></p></center>
+
 		
 		<style type="text/css">
 			body {
@@ -29,7 +31,7 @@
         		font-family: "Proxima Nova", Montserrat, sans-serif;
         		font-size: 2em;
         		font-weight: 100;
-        		color: #005DAA; /* offical UK Kentucky blue */
+        		color: #005DAA; /* basic styling and colors */
     		}
     		form {
         		top: 80px;
@@ -46,7 +48,7 @@
 
 	<body>
 
-	<form>
+	<form> <!--adding radio buttons to toggle between data -->
     	<input type="radio" name="well" id="HRCper" checked="true" /><label for="Clinton">Clinton Vote</label>
     	<input type="radio" name="well" id="DJTper" /><label for="Trump">Trump Vote</label>
     	<input type="radio" name="well" id="therm_unio" /><label for="Unions">Unions Thermometer</label>
@@ -61,26 +63,26 @@
 			var width = 700,
         		height = 700;
   
-    		var svg = d3.select( "body" )
+    		var svg = d3.select( "body" ) //setup initial svg parameters
           		.append( "svg" )
           		.attr( "width", width )
           		.attr( "height", height );
  
-    		var projection = d3.geo.albers()
+    		var projection = d3.geo.albers() //decide on map projection parameters
     			.center([0, 37.8])
         		.scale(950)
         		.translate([width / 2, height / 2]);
     
-    		var geoPath = d3.geo.path()
+    		var geoPath = d3.geo.path() //project the map data into d3
         		.projection(projection);
 
-    		queue()
+    		queue() //import json data
     			.defer(d3.json, "https://rawgit.com/aagoldberg/aagoldberg.github.io/master/cb_2016_us_cd115_5mT3.json")
     			.await(ready);
     
     		function ready(error, congressionals){
         
-        		var attribute = "HRCper"; // alternative is "oil_wells"
+        		var attribute = "HRCper"; // initial data presented
         
         		var breaks = ss.jenks(congressionals.objects.cb_2016_us_cd115_5m.geometries.map(function(d) { 
             		return d.properties[attribute]; 
@@ -89,13 +91,13 @@
         		breaks.shift(); // remove min value from breaks Array before applying to domain
         		breaks.pop(); // same for max
         
-        		var colors = ["#edf8e9","#bae4b3","#74c476","#31a354","#006d2c"];
+        		var colors = ["#edf8e9","#bae4b3","#74c476","#31a354","#006d2c"]; //set color breaks
         
-        		var jenks = d3.scale.threshold()
+        		var jenks = d3.scale.threshold() //create jenks function to break data by those colors
             		.domain(breaks)
             		.range(colors);
                  
-    			var congressionalsSVG = svg.append("g")
+    			var congressionalsSVG = svg.append("g") //bind data to svg
         			.selectAll("path")
         			.data(topojson.feature(congressionals, congressionals.objects.cb_2016_us_cd115_5m).features)
         			.enter()
@@ -105,7 +107,7 @@
        
        			color();
        
-       			d3.selectAll("input").on("change", function() {
+       			d3.selectAll("input").on("change", function() { //setup dynamic data mapping using radio buttons
        				attribute = this.id;
           			color();
        				});
@@ -120,7 +122,7 @@
               }
         
     		}
-			var linear = d3.scale.linear()
+			var linear = d3.scale.linear() //setup legend
   				.domain([0,1])
   				.range(["#edf8e9", "#006d2c"]);
 
