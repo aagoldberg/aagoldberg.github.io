@@ -1,0 +1,39 @@
+<html>
+  <head>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['sankey']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'From');
+        data.addColumn('string', 'To');
+        data.addColumn('number', 'Weight');
+        data.addRows([
+          [ 'Clinton Pre', 'Clinton Post', 1293 ],
+          [ 'Clinton Pre', 'Trump Post', 35 ],
+          [ 'Clinton Pre', 'Other Post', 27 ],
+          [ 'Trump Pre', 'Trump Post', 1141 ],
+          [ 'Trump Pre', 'Clinton Post', 17],
+          [ 'Trump Pre', 'Other Post', 15],
+          [ 'Other Pre', 'Other Post', 135 ],
+          [ 'Other Pre', 'Clinton Post', 74 ],
+          [ 'Other Pre', 'Trump Post', 61 ],
+        ]);
+
+        // Sets chart options.
+        var options = {
+          width: 600,
+        };
+
+        // Instantiates and draws our chart, passing in some options.
+        var chart = new google.visualization.Sankey(document.getElementById('sankey_basic'));
+        chart.draw(data, options);
+      }
+    </script>
+  </head>
+  <body>
+    <div id="sankey_basic" style="width: 900px; height: 300px;"></div>
+  </body>
+</html>

@@ -19,45 +19,15 @@
 						.append("svg")
 						.attr("width", w)
 						.attr("height", h);
-			
-      //Load in survey data
-			d3.csv("https://raw.githubusercontent.com/aagoldberg/aagoldberg.github.io/master/PresResDat3.csv", function(data) {
+      
+      //Load in json data
+			d3.json("https://raw.githubusercontent.com/aagoldberg/aagoldberg.github.io/master/cb_2016_us_cd115_5m.json", function(json) {
 				//Set input domain for color scale
 				color.domain([
-					d3.min(data, function(d) { return d.HRCper; }), 
-					d3.max(data, function(d) { return d.HRCper; })
-				]);
-				
-        //Load in GeoJSON data
-				d3.json("https://raw.githubusercontent.com/aagoldberg/aagoldberg.github.io/master/cb_2016_us_cd115_5m.json", function(json) {
-					//Merge the survey data and GeoJSON
-					//Loop through once for each survey data value
-					for (var i = 0; i < data.length; i++) {
-				
-						//Grab state name and congressional district
-						var dataState = data[i].State;
-						var dataCD = data[i].CD;
+					d3.min(json, function(d) { return d.HRCper; }), 
+					d3.max(json, function(d) { return d.HRCper; })
+				]);			
 
-						//Grab data value, and convert from string to float
-						var dataValue = parseFloat(data[i].HRCper);
-				
-						//Find the corresponding state inside the GeoJSON
-						for (var j = 0; j < json.features.length; j++) {
-						
-							var jsonState = json.features[j].properties.STATEFP;
-							var jsonCD = json.features[j].properties.CD115FP;
-							
-							if (dataState == jsonState && dataCD == jsonCD) {
-						
-								//Copy the data value into the JSON
-								json.features[j].properties.HRCper = dataValue;
-								
-								//Stop looking through the JSON
-								break;
-								
-							}
-						}		
-					}
 					//Bind data and create one path per GeoJSON feature
 					svg.selectAll("path")
 					   .data(json.features)
@@ -79,4 +49,4 @@
 			
 				});
 			
-			});
+			};
