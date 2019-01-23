@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Election Results by Congressional District</title>
+		<script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script> 
+		<script type="text/javascript" src="hhttps://cdnjs.cloudflare.com/ajax/libs/queue-async/1.0.7/queue.min.js"></script>
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.19/topojson.min.js"></script>
+		<script type="text/javascript" src="https://rawgit.com/maptimelex/d3-mapping/master/d3-map06-data-area/simple_statistics.js"></script>
+		<script type="text/javascript" src="https://rawgit.com/emeeks/d3-svg-legend/master/legend.js"></script>
+		<script type="text/javascript" src="http://d3js.org/colorbrewer.v1.min.js"></script>
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/1.13.0/d3-legend.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/queue-async/1.0.7/queue.min.js"></script>
+		<script src="https://rawgit.com/maptimelex/d3-mapping/master/d3-map06-data-area/simple_statistics.js"></script>
+		<link href="http://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet" type="text/css">
+    <style> .indented { padding-left: 50pt; padding-right: 50pt; } </style>
+		<center><b>American National Election Studies 2016 Time Series Study results by Congressional District</b></center>
+
+
+		
+		<style type="text/css">
+			body {
+        		padding: 0;
+        		margin: 0;
+        		background: whitesmoke;
+    		}
+    		h1, form {
+        		position: absolute;
+        		left: 20px;
+        		top: 10px;
+        		font-family: "Proxima Nova", Montserrat, sans-serif;
+        		font-size: 2em;
+        		font-weight: 100;
+        		color: #005DAA; /* basic styling and colors */
+    		}
+    		form {
+        		top: 80px;
+        		font-size: 1.1em;
+    		}
+    		label {
+        		margin: 0 10px 0 4px;   
+    		}
+    		.congressional {
+        		stroke: #fff;
+    		}		
+		</style>
+	</head>
+
+	<body>
+
+	<form> <!--adding radio buttons to toggle between data -->
+    	<input type="radio" name="well" id="HRCper" checked="true" /><label for="Clinton">Clinton Vote</label>
+    	<input type="radio" name="well" id="DJTper" /><label for="Trump">Trump Vote</label>
+    	<input type="radio" name="well" id="therm_unio" /><label for="Unions">Unions Thermometer</label>
+    	<input type="radio" name="well" id="therm_lgbt" /><label for="LGBT">LGBT Thermometer</label>
+    	<input type="radio" name="well" id="flag_pride" /><label for="Flag Pride">American Flag Pride</label>
+    	<input type="radio" name="well" id="obama_musl" /><label for="Obama Muslim">Obama is Muslim?</label>
+    	<input type="radio" name="well" id="reducing_d" /><label for="Deficit">Importance of Reducing Deficit</label>
+    	<input type="radio" name="well" id="immigratio" /><label for="Immigration">Immigration Hurts Jobs</label>
+    	<input type="radio" name="well" id="government" /><label for="govt">Government Size</label>
+	</form>
+		<script type="text/javascript">
+			var width = 700,
+        		height = 700;
+  
+    		var svg = d3.select( "body" ) //setup initial svg parameters
+          		.append( "svg" )
+          		.attr( "width", width )
+          		.attr( "height", height );
+ 
+    		var projection = d3.geo.albers() //decide on map projection parameters
+    			.center([0, 37.8])
+        		.scale(950)
+        		.translate([width / 2, height / 2]);
+    
+    		var geoPath = d3.geo.path() //project the map data into d3
+        		.projection(projection);
+
+    		queue() //import json data
+    			.defer(d3.json, "https://rawgit.com/aagoldberg/aagoldberg.github.io/master/cb_2016_us_cd115_5mT3.json")
+    			.await(ready);
+    
+    		function ready(error, congressionals){
+        
+        		var attribute = "HRCper"; // initial data presented
+        
+        		var breaks = ss.jenks(congressionals.objects.cb_2016_us_cd115_5m.geometries.map(function(d) { 
+            		return d.properties[attribute]; 
+        			}), 5);
+        
+        		breaks.shift(); // remove min value from breaks Array before applying to domain
+        		breaks.pop(); // same for max
+        
+        		var colors = ["#edf8e9","#bae4b3","#74c476","#31a354","#006d2c"]; //set color breaks
+        
+        		var jenks = d3.scale.threshold() //create jenks function to break data by those colors
+            		.domain(breaks)
+            		.range(colors);
+                 
+    			var congressionalsSVG = svg.append("g") //bind data to svg
+        			.selectAll("path")
+        			.data(topojson.feature(congressionals, congressionals.objects.cb_2016_us_cd115_5m).features)
+        			.enter()
+        			.append("path")
+        			.attr( "d", geoPath )
+        			.attr("class","congressional");
+       
+       			color();
+       
+       			d3.selectAll("input").on("change", function() { //setup dynamic data mapping using radio buttons
+       				attribute = this.id;
+          			color();
+       				});
+       
+       		function color(){
+       
+       		d3.selectAll('.congressional')
+          		.transition()
+              .attr( "fill", function(d){
+              		return jenks(d.properties[attribute]);
+                  });
+              }
+        
+    		}
+			var linear = d3.scale.linear() //setup legend
+  				.domain([0,1])
+  				.range(["#edf8e9", "#006d2c"]);
+
+			var svg = d3.select("svg");
+
+			svg.append("g")
+  				.attr("class", "legendLinear")
+  				.attr("transform", "translate(20,20)");
+
+			var legendLinear = d3.legend.color()
+  				.shapeWidth(30)
+  				.orient('horizontal')
+  				.scale(linear);
+
+			svg.select(".legendLinear")
+  				.call(legendLinear);
+			
+		</script>
+    <center><p>Resources available at <a href="http://www.electionstudies.org/studypages/anes_timeseries_2016/anes_timeseries_2016.htm">electionstudies.org</a></p></center>
+    <div class="indented">
+    <b>Background:</b>
+    <p>The 2016 presidential election cycle brought new and unique styles of campaigning to the national stage. Both Hillary Clinton and Donald Trump competed over previously overlooked demographic segments, while the press had trouble keeping up with the deluge of often bizarre and unprecedented campaign developments. </p>
+    <p>Although many argue that the personality of the candidates was the deciding factor in the race, we can still see that the country is divided along the often partisan lines on the basic social and economic issues displayed on this map.</p>
+    <p>While the map focused on explaining voter behavior within smaller geographies—sometimes at the expense of accuracy and sample size—there were still many clear findings:</p>
+    <UL>
+    <LI>  Clinton performed best within the coastal areas and southern cities, while Trump was strongest in more central states.
+    <LI>  Likewise, Unions and LGBT are most warmly received on the coasts, and within southern cities, with additional favorable opinion for unions in the great lakes and heartland area cities. 
+    <LI> Pride in the American flag was most prominent in southern states. 
+    <LI> Belief that Obama is a Muslim was most conspicuous in more rural communities.
+    <LI> Reducing the deficit was most important in southern and great lakes area suburbs.
+    <LI> Concern that immigration hurts jobs appears most intense in rural areas of the great lakes states and along the southern border.
+    <LI> Lastly, preference for a larger, more active government is preferred in the northeast, within southern cities and along the Mississippi river. </UL> </div>
+
+
+	</body>
+</html>
